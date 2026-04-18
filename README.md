@@ -35,10 +35,10 @@ This project implements the NRMS (Neural News Recommendation with Multi-Head Sel
 
 ### The sourcing problem
 
-Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. 
+Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. I actually had to do the whole experiment again with a temporal split after I saw the AUC score being way too high and saw that the data in the validation set was the exact same as the training set, so 
 ### The fix: temporal 75/25 holdout
 
-Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. This is a proper temporal holdout — the model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `create_temporal_split.py`.
+Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. This is a proper temporal holdout — the model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `temporal_split.py`.
 
 ### How this differs from the canonical split
 
