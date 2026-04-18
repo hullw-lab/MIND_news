@@ -22,8 +22,8 @@
 News recommendation asks: given a user's click history, rank a list of candidate articles so the ones they are most likely to click appear first. Three characteristics make this harder than a typical recommender problem:
 
 - **Items churn fast.** Most news articles are irrelevant within 24 hours, so collaborative filtering over item IDs is weak.
-- **Users are sparse.** A large fraction of users in MIND-small have fewer than 10 historical clicks — a severe cold-start regime.
-- **Content matters.** Because item IDs don't generalize, the model has to read the title (and optionally the abstract) to score an article.
+- **Users are sparse.** A large fraction of users in MIND-small have fewer than 10 historical clicks.
+- **Content matters.** Because item IDs don't generalize, the model has to read the title to score an article.
 
 This project implements the NRMS (Neural News Recommendation with Multi-Head Self-Attention) architecture, which addresses these constraints by encoding each article's title via word-level multi-head self-attention, then pooling the user's history of encoded articles via another self-attention layer to produce a single user vector. The click score is the dot product between the user vector and each candidate's news vector.
 
@@ -31,12 +31,11 @@ This project implements the NRMS (Neural News Recommendation with Multi-Head Sel
 
 ## 2. Methodology Note on Train/Validation Split
 
-**Why this section exists:** the canonical MIND-small dataset ships with separate train and dev files, but the authoritative source was unavailable during this project, requiring a different validation strategy.
+**Why this section exists:** The canonical MIND-small dataset ships with separate train and dev files, but the authoritative source was unavailable during this project, requiring a different validation strategy.
 
 ### The sourcing problem
 
-In mid-2024 Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. This is documented in GitHub issue [recommenders-team/recommenders#2133](https://github.com/recommenders-team/recommenders/issues/2133) and affects every tutorial that references the canonical URLs — Microsoft's own Azure Open Datasets documentation still links to the dead endpoint as of this writing. Alternative mirrors (Kaggle's `arashnic/mind-news-dataset`, plus one direct-download source) were tried; all contained the train file mislabeled as `MINDsmall_dev.zip`. Per Microsoft's own documentation the real dev file should be ~30 MB with 73,152 rows covering Nov 15–22; every available file was 92 MB with 156,965 rows covering Nov 9–14 (i.e. a copy of the train file).
-
+Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. 
 ### The fix: temporal 75/25 holdout
 
 Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. This is a proper temporal holdout — the model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `create_temporal_split.py`.
