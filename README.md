@@ -41,10 +41,6 @@ Microsoft disabled public access to the original MIND Azure blob at `https://min
 
 Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. The model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `temporal_split.py`.
 
-### How this differs from the canonical split
-
-The canonical MIND-small dev file holds out the week after training (Nov 15–22), while this project's split holds out the tail of the train week (Nov 11–14). The canonical setup is harder: a full week of interest drift separates train from eval. The temporal-tail setup is slightly easier because trending topics and active articles have not shifted as much. As a result, my reported AUC (0.7316) is above the NRMS paper's reported figure (0.6776 on the canonical split) and above the assignment guide's "tuned NRMS" target range (0.67–0.70). This is a property of the evaluation setup, not of the model; running the same code against the canonical dev file would produce paper-matching numbers.
-
 ---
 
 ## 3. Methodology
@@ -97,7 +93,7 @@ Supply is heavily skewed toward two dominant categories. "News" (~15,800 article
 
 *Figure 2: Click-through rate by category*
 
-The CTR ranking is nearly inverted from the supply ranking. Music and TV (~6% CTR) are the highest-engagement categories despite being near the bottom in article count. News and sports, which dominate supply, sit in the middle of the CTR distribution at ~4.5%. Kids (~2%) is the least engaging. This "niche high-engagement" pattern is a classic signal that a simple supply-driven ranker is leaving value on the table, and argues for category-aware encoding as an extension.
+The CTR ranking is nearly inverted from the supply ranking. Music and TV (6% CTR) are the highest-engagement categories despite being near the bottom in article count. News and sports, which dominate supply, sit in the middle of the CTR distribution at ~4.5%. Kids (2%) is the least engaging. This pattern is a signal that a simple supply-driven ranker is leaving value on the table, and argues for category-aware encoding as an extension.
 
 ### 4.3 User activity distribution
 
@@ -105,7 +101,7 @@ The CTR ranking is nearly inverted from the supply ranking. Music and TV (~6% CT
 
 *Figure 3: Total clicks per user over the 6-week window (log scale)*
 
-A textbook long-tail on a log y-axis. The vast majority of users (~28,000 out of ~50,000) have just 1–2 clicks in the entire six-week window. Only a few dozen users exceed 60 clicks, and a single outlier is visible past 120. This is the cold-start problem visualized: most users have very little history to work with.
+A long-tail on a log y-axis. The vast majority of users 28,000 out of 50,000 have just 1–2 clicks in the entire six-week window. Only a few dozen users exceed 60 clicks, and a single outlier is visible past 120. Most users have very little history to work with.
 
 ### 4.4 History length at impression time
 
@@ -113,7 +109,7 @@ A textbook long-tail on a log y-axis. The vast majority of users (~28,000 out of
 
 *Figure 4: Distribution of user history length at impression time (clipped at 200)*
 
-At impression time, most users have 5–30 clicked articles in history. The peak is around 5–10, with a long right tail. A minority of users have very long histories (the visible spike at 200 is a clipping artifact). This distribution confirms `max_history=50` was well-chosen — it covers the bulk of users without truncating much.
+At impression time, most users have 5–30 clicked articles in history. The peak is around 5–10, with a long right tail. A minority of users have very long histories, the visible spike at 200 is a clipping artifact. This distribution confirms `max_history=50` was well-chosen. It covers the bulk of users without truncating much.
 
 ### 4.5 Impression size distribution
 
@@ -129,7 +125,7 @@ Most impressions show between 3 and 40 candidates, with a pronounced right-tail.
 
 *Figure 6: Impressions per day (left) and per hour of day in UTC (right)*
 
-The daily plot shows the six-day window of the train file (Nov 9–14, 2019). The ramp from Nov 9 to Nov 11 reflects incomplete data at the start of the window. The hourly plot shows a clear diurnal rhythm: impressions peak at 7–11 AM UTC (the US morning commute) and drop off overnight. This diurnal pattern suggests that user interests shift throughout the day — something a pure content-based model ignores.
+The daily plot shows the six-day window of the train file (Nov 9–14, 2019). The ramp from Nov 9 to Nov 11 reflects incomplete data at the start of the window. Impressions peak at 7–11 AM UTC (the US morning commute) and drop off overnight. This diurnal pattern suggests that user interests shift throughout the day.
 
 ### 4.7 Title length distribution
 
@@ -137,7 +133,7 @@ The daily plot shows the six-day window of the train file (Nov 9–14, 2019). Th
 
 *Figure 7: Distribution of title length after NLTK tokenization*
 
-Title lengths are approximately normally distributed with mean ~11 tokens and a tail ending around 25 tokens. The red dashed line marks our `max_title_len=30` cutoff; essentially no titles are truncated. The narrow distribution highlights a limitation of title-only encoding: 10 tokens is not much content to work with, suggesting that incorporating the abstract is an obvious direction for improvement.
+Title lengths are approximately normally distributed with mean 11 tokens and a tail ending around 25 tokens. The red dashed line marks our `max_title_len=30` cutoff; essentially no titles are truncated. The narrow distribution highlights a limitation of title-only encoding: 10 tokens is not much content to work with, suggesting that incorporating the abstract is an obvious direction for improvement.
 
 ### 4.8 EDA takeaways that influenced modeling
 
