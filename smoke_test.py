@@ -1,6 +1,5 @@
 """
 Smoke test with synthetic MIND-format data.
-Does NOT require real data download.
 Verifies:
   - TSV parsing
   - tokenizer + GloVe (random matrix stand-in)
