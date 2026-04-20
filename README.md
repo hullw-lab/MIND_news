@@ -35,10 +35,11 @@ This project implements the NRMS (Neural News Recommendation with Multi-Head Sel
 
 ### The sourcing problem
 
-Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. I actually had to do the whole experiment again with a temporal split after I saw the AUC score being way too high and saw that the data in the validation set was the exact same as the training set, so 
+Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. I actually had to do the whole experiment again with a temporal split after I saw the AUC score being way too high and saw that the data in the validation set was the exact same as the training set.
+
 ### The fix: temporal 75/25 holdout
 
-Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. This is a proper temporal holdout — the model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `temporal_split.py`.
+Rather than train and evaluate on the same data, I implemented a temporal 75/25 split of the real train file: the first 117,723 impressions (Nov 9 through Nov 10) became the training set, and the last 39,242 impressions (Nov 11 through Nov 14) became the held-out validation set. The model is trained on earlier impressions and evaluated on later impressions it has never seen. All results in this report come from this clean split, not from in-sample evaluation. The script that performs the split is included in the repository as `temporal_split.py`.
 
 ### How this differs from the canonical split
 
@@ -56,8 +57,8 @@ MIND-small from Microsoft Research. After the temporal 75/25 split described in 
 
 The NRMS model has two main components plus a scoring function:
 
-- **News Encoder.** Input: 30-token title (padded/truncated). Pipeline: GloVe 300d word embedding (trainable) → dropout → linear projection to 256d → multi-head self-attention (16 heads × 16 dim) → dropout → additive attention pooling → 256d news vector.
-- **User Encoder.** Input: user's clicked news history (up to 50 articles, each encoded by the shared News Encoder). Pipeline: multi-head self-attention over the sequence of 256d news vectors → dropout → additive attention pooling → 256d user vector.
+- **News Encoder.** Input: 30-token title (padded/truncated). Pipeline: GloVe 300d word embedding (trainable) -> dropout -> linear projection to 256d -> multi-head self-attention (16 heads × 16 dim) -> dropout -> additive attention pooling -> 256d news vector.
+- **User Encoder.** Input: user's clicked news history (up to 50 articles, each encoded by the shared News Encoder). Pipeline: multi-head self-attention over the sequence of 256d news vectors -> dropout -> additive attention pooling -> 256d user vector.
 - **Scoring.** Click score = dot product between user vector and each candidate news vector. Candidates in each impression are ranked by this score.
 
 The same News Encoder weights are used for both the user's history and the candidate articles. This guarantees that history vectors and candidate vectors live in the same space, which makes the final dot-product scoring meaningful.
