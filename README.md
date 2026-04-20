@@ -31,8 +31,6 @@ This project implements the NRMS (Neural News Recommendation with Multi-Head Sel
 
 ## 2. Methodology Note on Train/Validation Split
 
-**Why this section exists:** The canonical MIND-small dataset ships with separate train and dev files, but the authoritative source was unavailable during this project, requiring a different validation strategy.
-
 ### The sourcing problem
 
 Microsoft disabled public access to the original MIND Azure blob at `https://mind201910small.blob.core.windows.net/release/`. Kaggle only had the training set and the official MIND website's validation set was just a duplicate of the training. I actually had to do the whole experiment again with a temporal split after I saw the AUC score being way too high and saw that the data in the validation set was the exact same as the training set.
